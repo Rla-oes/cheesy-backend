@@ -1,9 +1,16 @@
 const express = require("express");
-const savedMenuController = require("../controllers/savedMenuController");
+const {
+    createAnonymousId,
+    getSavedMenus,
+    saveMenu,
+    deleteSavedMenu,
+} = require("../controllers/savedMenuController");
+
 const router = express.Router();
 
-router.post("/", savedMenuController.saveMenu);
-router.get("/", savedMenuController.getSavedMenus);
-router.delete("/:id", savedMenuController.deleteSavedMenu);
+router.get("/generate-anonymous-id", createAnonymousId); 
+router.get("/", getSavedMenus); 
+router.post("/", saveMenu); 
+router.delete("/:id", deleteSavedMenu); 
 
 module.exports = router;
