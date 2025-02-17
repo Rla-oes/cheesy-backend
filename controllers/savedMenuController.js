@@ -1,5 +1,12 @@
 const db = require("../models");
-const { SavedMenu, Menu } = db; 
+const { SavedMenu, Menu } = db;
+const { v4: uuidv4 } = require("uuid");
+
+exports.createAnonymousId = (req, res) => {
+    const anonymous_id = uuidv4();
+    res.status(200).json({ anonymous_id });
+};
+
 
 exports.saveMenu = async (req, res) => {
     const { anonymous_id, menu_id } = req.body;
@@ -9,9 +16,15 @@ exports.saveMenu = async (req, res) => {
     }
 
     try {
+        // 메뉴 존재 여부 확인
+        const menu = await Menu.findByPk(menu_id);
+        if (!menu) {
+            return res.status(404).json({ message: "존재하지 않는 메뉴입니다." });
+        }
+
         const savedMenu = await SavedMenu.create({
-            anonymous_id, 
-            menu_id,      
+            anonymous_id,
+            menu_id,
         });
         res.status(201).json({ message: "메뉴 저장 성공!", savedMenu });
     } catch (error) {
@@ -29,11 +42,11 @@ exports.getSavedMenus = async (req, res) => {
 
     try {
         const savedMenus = await SavedMenu.findAll({
-            where: { anonymous_id }, 
+            where: { anonymous_id },
             include: [
                 {
-                    model: Menu, 
-                    attributes: ["name", "category"], 
+                    model: Menu,
+                    attributes: ["name", "category"],
                 },
             ],
         });
@@ -54,15 +67,16 @@ exports.deleteSavedMenu = async (req, res) => {
     }
 
     try {
-        const menu = await SavedMenu.destroy({
-            where: { id, anonymous_id }, 
-        });
+        // 삭제할 메뉴 찾기
+        const menu = await SavedMenu.findOne({ where: { id, anonymous_id } });
 
-        if (menu) {
-            res.status(200).json({ message: "메뉴 삭제 성공!", deleted_menu: { id } });
-        } else {
-            res.status(404).json({ message: "메뉴를 찾을 수 없습니다." });
+        if (!menu) {
+            return res.status(404).json({ message: "메뉴를 찾을 수 없습니다." });
         }
+
+        // 메뉴 삭제
+        await menu.destroy();
+        res.status(200).json({ message: "메뉴 삭제 성공!", deleted_menu: menu });
     } catch (error) {
         console.error("메뉴 삭제 실패:", error);
         res.status(500).json({ message: "메뉴 삭제 실패ㅠㅠ" });

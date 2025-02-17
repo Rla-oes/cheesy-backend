@@ -15,6 +15,17 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.DATE,
             defaultValue: DataTypes.NOW, 
         },
+
+        user_id: {  
+            type: DataTypes.UUID,  
+            allowNull: true,
+            references: {
+                model: "Users", 
+                key: "id"
+            },
+            onUpdate: "CASCADE",
+            onDelete: "SET NULL"
+        }
     });
 
     SavedMenu.associate = (models) => {
