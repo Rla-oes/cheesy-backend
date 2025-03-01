@@ -1,18 +1,19 @@
 require("dotenv").config();
 const fs = require("fs");
 const path = require("path");
-const mysql = require("mysql2");
+const mariadb = require("mariadb");
 
-const connection = mysql.createConnection({
+const pool = mariadb.createPool({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
+  connectionLimit: 10,
 });
 
 const csvFilePath = path.join(__dirname, "data", "menus.csv");
 
-fs.readFile(csvFilePath, "utf8", (err, data) => {
+fs.readFile(csvFilePath, "utf8", async (err, data) => {
   if (err) {
     console.error("파일을 읽는 중 오류 발생:", err);
     return;
@@ -42,14 +43,20 @@ fs.readFile(csvFilePath, "utf8", (err, data) => {
     return;
   }
 
-  // MySQL에 데이터 삽입 (id 포함)
-  const insertQuery = "INSERT INTO menus (id, name, category) VALUES ?";
-  connection.query(insertQuery, [values], (err, result) => {
-    if (err) {
-      console.error("데이터 삽입 중 오류 발생:", err);
-    } else {
-      console.log("데이터 삽입 성공!:", result.affectedRows, "행 추가됨");
+  let conn;
+  try {
+    conn = await pool.getConnection();
+    const insertQuery =
+      "INSERT INTO menus (id, name, category) VALUES (?, ?, ?)";
+
+    for (const row of values) {
+      await conn.query(insertQuery, row);
     }
-    connection.end();
-  });
+
+    console.log("데이터 삽입 성공! 총", values.length, "행 추가됨");
+  } catch (err) {
+    console.error("데이터 삽입 중 오류 발생:", err);
+  } finally {
+    if (conn) conn.release();
+  }
 });

@@ -12,3 +12,6 @@ yarn-error.log*
 # Logs
 logs/
 *.log
+
+# MySQL/MariaDB backup files
+menu_backup.sql
