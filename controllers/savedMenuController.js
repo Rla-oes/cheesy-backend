@@ -1,12 +1,5 @@
 const db = require("../models");
-const { SavedMenu, Menu } = db;
-const { v4: uuidv4 } = require("uuid");
-
-//익명 사용자를 구분하기 위한 고유 ID 생성
-exports.createAnonymousId = (req, res) => {
-  const anonymous_id = uuidv4();
-  res.status(200).json({ anonymous_id });
-};
+const { SavedMenu, Menu, User } = db;
 
 // 랜덤으로 선택된 메뉴 저장 기능
 exports.saveMenu = async (req, res) => {
@@ -19,16 +12,24 @@ exports.saveMenu = async (req, res) => {
   }
 
   try {
+    // anonymous_id로 User 찾기
+    const user = await User.findOne({ where: { anonymous_id } });
+    if (!user) {
+      return res.status(404).json({ message: "사용자가 존재하지 않습니다." });
+    }
+
     // 메뉴 존재 여부 확인
     const menu = await Menu.findByPk(menu_id);
     if (!menu) {
       return res.status(404).json({ message: "존재하지 않는 메뉴입니다." });
     }
 
+    // 메뉴 저장
     const savedMenu = await SavedMenu.create({
-      anonymous_id,
+      user_id: user.id,
       menu_id,
     });
+
     res.status(201).json({ message: "메뉴 저장 성공!", savedMenu });
   } catch (error) {
     console.error("메뉴 저장 실패:", error);
@@ -45,16 +46,25 @@ exports.getSavedMenus = async (req, res) => {
   }
 
   try {
-    const savedMenus = await SavedMenu.findAll({
+    const user = await User.findOne({
       where: { anonymous_id },
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: "사용자가 존재하지 않습니다." });
+    }
+
+    const savedMenus = await SavedMenu.findAll({
+      where: { user_id: user.id },
       include: [
         {
           model: Menu,
-          attributes: ["name", "category"],
+          attributes: ["id", "name", "category"],
         },
       ],
     });
 
+    console.log("📋 savedMenus:", savedMenus);
     res.status(200).json(savedMenus);
   } catch (error) {
     console.error("저장된 메뉴 불러오기 실패:", error);
@@ -72,14 +82,17 @@ exports.deleteSavedMenu = async (req, res) => {
   }
 
   try {
-    // 삭제할 메뉴 찾기
-    const menu = await SavedMenu.findOne({ where: { id, anonymous_id } });
+    const user = await User.findOne({ where: { anonymous_id } });
+    if (!user) {
+      return res.status(404).json({ message: "사용자가 존재하지 않습니다." });
+    }
+
+    const menu = await SavedMenu.findOne({ where: { id, user_id: user.id } });
 
     if (!menu) {
       return res.status(404).json({ message: "메뉴를 찾을 수 없습니다." });
     }
 
-    // 메뉴 삭제
     await menu.destroy();
     res.status(200).json({ message: "메뉴 삭제 성공!", deleted_menu: menu });
   } catch (error) {

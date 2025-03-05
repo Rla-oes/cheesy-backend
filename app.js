@@ -3,6 +3,7 @@ const cors = require("cors");
 const path = require("path");
 const savedMenuRoutes = require("./routes/savedMenuRoutes");
 const userRoutes = require("./routes/userRoutes");
+const menuRoutes = require("./routes/menuRoutes");
 require("dotenv").config();
 
 const { sequelize } = require("./models");
@@ -25,15 +26,13 @@ sequelize
     process.exit(1);
   });
 
-// API 라우트 설정
 app.use("/api/saved-menus", savedMenuRoutes);
-app.use("/api/users", userRoutes);
+app.use("/api", userRoutes);
+app.use("/api/menus", menuRoutes);
 
-// React 정적 파일 제공
 const reactBuildPath = path.join(__dirname, "../cheesy-frontend/build");
 app.use(express.static(reactBuildPath));
 
-// index.html로 연결
 app.get("*", (req, res) => {
   res.sendFile(path.join(reactBuildPath, "index.html"));
 });

@@ -1,9 +1,9 @@
 const express = require("express");
-const userController = require("../controllers/userController");
+const { createAnonymousId, getUser } = require("../controllers/userController");
+
 const router = express.Router();
 
-router.post("/", userController.createUser);
-
-router.get("/", userController.getUser);
+router.get("/generate-anonymous-id", createAnonymousId);
+router.get("/user", getUser);
 
 module.exports = router;

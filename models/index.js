@@ -17,9 +17,16 @@ db.Sequelize = Sequelize;
 
 db.User = require("./user")(sequelize, Sequelize);
 db.SavedMenu = require("./savedMenu")(sequelize, Sequelize);
+db.Menu = require("./menu")(sequelize, Sequelize);
 
 db.User.hasMany(db.SavedMenu, { foreignKey: "user_id" });
 db.SavedMenu.belongsTo(db.User, { foreignKey: "user_id" });
+
+Object.keys(db).forEach((modelName) => {
+  if (db[modelName].associate) {
+    db[modelName].associate(db);
+  }
+});
 
 module.exports = db;
 
