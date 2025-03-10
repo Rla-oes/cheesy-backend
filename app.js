@@ -13,8 +13,8 @@ const app = express();
 app.use(
   cors({
     origin: [
-      "https://port-0-cheesy-backend-m82xd98hcfdf2a62.sel4.cloudtype.app/",
-      "https://web-cheesy-frontend-m82xd98hcfdf2a62.sel4.cloudtype.app/",
+      "https://port-0-cheesy-backend-m82xd98hcfdf2a62.sel4.cloudtype.app",
+      "https://web-cheesy-frontend-m82xd98hcfdf2a62.sel4.cloudtype.app",
       "http://localhost:8080",
     ],
     methods: ["GET", "POST", "PUT", "DELETE"],
