@@ -2,10 +2,12 @@ const { Sequelize } = require("sequelize");
 const { Menu } = require("../models");
 
 exports.getRandomMenuByCategory = async (req, res) => {
-  const category = decodeURIComponent(req.params.category); // 💥 여기가 핵심
-  console.log("Category:", category);
-
+  let category = req.params.category;
   try {
+    // 🔥 URL 디코딩 강제 적용
+    category = decodeURIComponent(category);
+    console.log("Decoded category:", category);
+
     const menu = await Menu.findOne({
       where: { category: category },
       order: Sequelize.literal("rand()"),
