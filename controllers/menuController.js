@@ -2,7 +2,8 @@ const { Sequelize } = require("sequelize");
 const { Menu } = require("../models");
 
 exports.getRandomMenuByCategory = async (req, res) => {
-  const category = req.params.category;
+  const category = decodeURIComponent(req.params.category); // 💥 여기가 핵심
+  console.log("Category:", category);
 
   try {
     const menu = await Menu.findOne({

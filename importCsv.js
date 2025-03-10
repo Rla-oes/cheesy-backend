@@ -5,6 +5,7 @@ const mariadb = require("mariadb");
 
 const pool = mariadb.createPool({
   host: process.env.DB_HOST,
+  port: parseInt(process.env.DB_PORT),
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
@@ -19,17 +20,11 @@ fs.readFile(csvFilePath, "utf8", async (err, data) => {
     return;
   }
 
-  // CSV 데이터를 줄 단위로 나누기 & \r 제거
   const rows = data
     .split("\n")
     .map((row) => row.replace("\r", ""))
     .filter((row) => row.trim() !== "")
     .slice(1);
-
-  if (rows.length === 0) {
-    console.error("CSV 파일에 유효한 데이터가 없습니다.");
-    return;
-  }
 
   const values = rows
     .map((row) => {
@@ -58,5 +53,6 @@ fs.readFile(csvFilePath, "utf8", async (err, data) => {
     console.error("데이터 삽입 중 오류 발생:", err);
   } finally {
     if (conn) conn.release();
+    await pool.end();
   }
 });
