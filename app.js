@@ -10,7 +10,17 @@ const { sequelize } = require("./models");
 
 const app = express();
 
-app.use(cors());
+app.use(
+  cors({
+    origin: [
+      "https://port-0-cheesy-backend-m82xd98hcfdf2a62.sel4.cloudtype.app/",
+      "https://web-cheesy-frontend-m82xd98hcfdf2a62.sel4.cloudtype.app/",
+      "http://localhost:8080",
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type"],
+  })
+);
 app.use(express.json());
 
 const PORT = process.env.PORT || 8080;
