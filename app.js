@@ -30,13 +30,6 @@ app.use("/api/saved-menus", savedMenuRoutes);
 app.use("/api", userRoutes);
 app.use("/api/menus", menuRoutes);
 
-const reactBuildPath = path.join(__dirname, "../cheesy-frontend/build");
-app.use(express.static(reactBuildPath));
-
-app.get("*", (req, res) => {
-  res.sendFile(path.join(reactBuildPath, "index.html"));
-});
-
 // 서버 실행
 app.listen(PORT, () => {
   console.log(`서버가 ${PORT}번 포트에서 실행 중입니다.`);
