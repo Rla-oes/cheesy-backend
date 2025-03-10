@@ -23,7 +23,7 @@ app.use(
 );
 app.use(express.json());
 
-const PORT = process.env.PORT || 8080;
+const PORT = 8080;
 
 // MariaDB 연결 확인
 sequelize
